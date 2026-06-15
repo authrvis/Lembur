@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lembur Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0e0c;--ink2:#3a3830;--ink3:#7a7568;--ink4:#b0a99f;
+  --paper:#f7f4ef;--paper2:#efeae1;--paper3:#e5dfd4;--paper4:#d8d0c4;
+  --green:#1a4d2e;--green2:#2d7a4f;--greenl:#d4ead9;--greens:#e8f5ec;
+  --red:#8b2020;--redl:#f5dada;
+  --warn:#7a4f00;--warnl:#faecd4;
+  --border:#d0c9bc;
+  --serif:'DM Serif Display',serif;
+  --sans:'Instrument Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+  --radius:4px;
+}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:14px}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 6rem}
+
+/* LOGIN SCREEN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.login-box{width:100%;max-width:400px;padding:2.5rem;border:1px solid var(--border);background:var(--paper)}
+.login-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
+.login-title{font-family:var(--serif);font-size:2rem;margin-bottom:.25rem}
+.login-title em{font-style:italic;color:var(--green2)}
+.login-sub{font-size:13px;color:var(--ink3);margin-bottom:2rem}
+.login-tabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:1.5rem}
+.login-tab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:.5rem 1.25rem;cursor:pointer;border:none;background:none;color:var(--ink3);border-bottom:2.5px solid transparent;margin-bottom:-1.5px}
+.login-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.login-field{margin-bottom:1rem}
+.login-field label{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:.35rem}
+.login-field input{width:100%;border:1px solid var(--border);background:var(--paper);padding:.55rem .75rem;font-family:var(--mono);font-size:16px;letter-spacing:.2em;color:var(--ink);outline:none;border-radius:var(--radius);text-align:center}
+.login-field input:focus{border-color:var(--green2)}
+.login-field input.name-inp{letter-spacing:normal;text-align:left;font-family:var(--sans);font-size:14px}
+.login-err{font-family:var(--mono);font-size:11px;color:var(--red);margin-top:.5rem;min-height:16px}
+.login-btn{width:100%;padding:.65rem;background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:500;border-radius:var(--radius);margin-top:.5rem;transition:background .15s}
+.login-btn:hover{background:var(--ink2)}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:1.5rem;border-bottom:2px solid var(--ink);margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.hdr-brand .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:.35rem}
+.hdr-brand h1{font-family:var(--serif);font-size:clamp(1.4rem,3vw,2.2rem);font-weight:400;line-height:1.1}
+.hdr-brand h1 em{font-style:italic;color:var(--green2)}
+.hdr-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.user-pill{font-family:var(--mono);font-size:11px;padding:.35rem .85rem;background:var(--paper2);border:1px solid var(--border);border-radius:2px;color:var(--ink3)}
+.user-pill strong{color:var(--ink)}
+
+/* SUMMARY */
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:2rem}
+.scard{background:var(--paper);padding:1rem 1.2rem}
+.scard.dk{background:var(--ink)}
+.scard.gn{background:var(--green)}
+.slbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.3rem}
+.scard.dk .slbl,.scard.gn .slbl{color:rgba(255,255,255,.45)}
+.sval{font-family:var(--serif);font-size:1.5rem;color:var(--ink);line-height:1;margin-bottom:.2rem}
+.scard.dk .sval,.scard.gn .sval{color:#fff}
+.snote{font-size:11px;color:var(--ink3)}
+.scard.dk .snote,.scard.gn .snote{color:rgba(255,255,255,.45)}
+
+/* TABS */
+.main-tabs{display:flex;border-bottom:2px solid var(--ink);margin-bottom:1.75rem}
+.main-tab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:.65rem 1.5rem;cursor:pointer;border:none;background:none;color:var(--ink3);border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s}
+.main-tab:hover{color:var(--ink)}
+.main-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+
+/* BUTTONS */
+.btn{padding:.5rem 1rem;border:1px solid;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;border-radius:var(--radius);transition:all .15s;white-space:nowrap}
+.btn.pr{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.pr:hover{background:var(--green2)}
+.btn.ou{background:none;color:var(--ink);border-color:var(--border)}
+.btn.ou:hover{background:var(--paper2)}
+.btn.dk{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.dk:hover{background:var(--ink2)}
+.btn.dn{background:none;color:var(--red);border-color:var(--red)}
+.btn.dn:hover{background:var(--redl)}
+.btn.sm{font-size:12px;padding:.35rem .8rem}
+.btn.xs{font-size:11px;padding:.25rem .6rem}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* TOOLBAR */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem}
+.toolbar-left{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.filter-sel,.search-inp{font-family:var(--mono);font-size:11px;padding:.4rem .75rem;border:1px solid var(--border);background:var(--paper);color:var(--ink);outline:none;border-radius:var(--radius)}
+.search-inp{width:200px}
+.search-inp:focus,.filter-sel:focus{border-color:var(--green2)}
+
+/* CARDS */
+.rlist{display:grid;gap:.75rem}
+.rcard{border:1px solid var(--border);background:var(--paper);transition:border-color .15s}
+.rcard:hover{border-color:var(--ink4)}
+.chdr{padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;cursor:pointer;user-select:none}
+.rcard.open .chdr{border-bottom:.5px solid var(--border)}
+.chdr:hover{background:var(--paper2)}
+.rname{font-weight:600;font-size:15px}
+.rmeta{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:4px;display:flex;gap:.75rem;flex-wrap:wrap}
+.rbody{display:none;padding:1.25rem}
+.rbody.open{display:block}
+
+/* PROGRESS */
+.cprog{height:3px;background:var(--paper3)}
+.cprogb{height:100%;transition:width .4s}
+
+/* BADGES */
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:2px;white-space:nowrap}
+.badge.pending{background:var(--warnl);color:var(--warn)}
+.badge.approved{background:var(--greenl);color:var(--green)}
+.badge.rejected{background:var(--redl);color:var(--red)}
+.badge.cancelled{background:var(--paper3);color:var(--ink3)}
+
+/* CHIPS */
+.date-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.chip{display:inline-block;background:var(--paper2);border:1px solid var(--border);padding:2px 10px;font-family:var(--mono);font-size:11px;border-radius:2px}
+.chip.ok{background:var(--greenl);border-color:var(--green2);color:var(--green)}
+
+/* TABLE */
+.ttable{width:100%;border-collapse:collapse;font-size:13px}
+.ttable th{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);padding:.4rem .75rem;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+.ttable th.r{text-align:right}
+.ttable td{padding:.65rem .75rem;border-bottom:.5px solid var(--border);vertical-align:top}
+.ttable td.mono{font-family:var(--mono);font-size:12px}
+.ttable td.r{text-align:right;font-family:var(--mono);font-size:12px}
+.ttable tr:last-child td{border-bottom:none}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.moverlay.open{display:flex}
+.mbox{background:var(--paper);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border:1px solid var(--border)}
+.mhead{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--paper);z-index:1}
+.mtitle{font-family:var(--serif);font-size:1.25rem}
+.mclose{background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink3);line-height:1;padding:0 6px}
+.mbody{padding:1.5rem}
+.mfoot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;justify-content:flex-end;position:sticky;bottom:0;background:var(--paper)}
+.msec{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);border-top:.5px solid var(--border);padding-top:.75rem;margin:1.25rem 0 .75rem}
+.msec.first{border-top:none;margin-top:0}
+
+/* FORMS */
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.fl label{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:.3rem}
+.fl input,.fl select,.fl textarea{width:100%;border:1px solid var(--border);background:var(--paper);padding:.45rem .7rem;font-family:var(--sans);font-size:13px;color:var(--ink);outline:none;border-radius:var(--radius)}
+.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--green2)}
+.fl textarea{resize:vertical;min-height:72px}
+
+/* DATE ROWS */
+.date-row-form{display:flex;gap:.5rem;align-items:flex-start;padding:.75rem;background:var(--paper2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.5rem}
+.date-row-form .fl{flex:1;margin:0}
+.date-row-form .remove-btn{background:none;border:none;cursor:pointer;color:var(--ink4);font-size:20px;padding:0 4px;margin-top:18px;line-height:1;transition:color .15s}
+.date-row-form .remove-btn:hover{color:var(--red)}
+.add-date-btn{width:100%;padding:.6rem;border:1.5px dashed var(--border);background:none;font-family:var(--mono);font-size:11px;color:var(--ink3);cursor:pointer;border-radius:var(--radius);transition:all .15s;letter-spacing:.05em}
+.add-date-btn:hover{background:var(--paper2);border-color:var(--ink4)}
+
+/* APPROVE ROWS */
+.approve-row{display:flex;align-items:center;gap:1rem;padding:.75rem 0;border-bottom:.5px solid var(--border)}
+.approve-row:last-child{border-bottom:none}
+.approve-date-info{flex:1;min-width:0}
+.approve-date-name{font-weight:600;font-size:13px}
+.approve-holiday{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:1px}
+.approve-inp{width:160px;flex-shrink:0;border:1px solid var(--border);background:var(--paper);padding:.4rem .6rem;font-family:var(--mono);font-size:12px;color:var(--ink);outline:none;border-radius:var(--radius)}
+.approve-inp:focus{border-color:var(--green2)}
+
+/* PNL BOX */
+.pnl-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.25rem}
+.pnl-item{background:var(--paper2);padding:.85rem 1rem}
+.pnl-item.gn{background:var(--green)}
+.pnl-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:.25rem}
+.pnl-item.gn .pnl-lbl{color:rgba(255,255,255,.5)}
+.pnl-val{font-family:var(--serif);font-size:1.3rem;line-height:1;color:var(--ink)}
+.pnl-item.gn .pnl-val{color:#fff}
+
+/* ADMIN: MANAGE KARYAWAN */
+.emp-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;border-bottom:.5px solid var(--border);transition:background .15s}
+.emp-row:last-child{border-bottom:none}
+.emp-row:hover{background:var(--paper2)}
+.emp-avatar{width:36px;height:36px;border-radius:50%;background:var(--paper3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;flex-shrink:0;color:var(--ink2)}
+.emp-info{flex:1;min-width:0}
+.emp-name{font-weight:600;font-size:14px}
+.emp-meta{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:1px}
+.emp-pin{font-family:var(--mono);font-size:12px;color:var(--ink3);letter-spacing:.1em}
+
+/* PIN INPUT DOTS */
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:1.25rem 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all .15s}
+.pin-dot.filled{background:var(--ink);border-color:var(--ink)}
+.pin-dot.error{background:var(--red);border-color:var(--red)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--ink3)}
+.empty-state h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:.5rem;color:var(--ink2)}
+.empty-state p{font-size:13px}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:var(--green2)}
+.sync-dot.loading{background:var(--gold);animation:pulse .8s ease-in-out infinite}
+.sync-dot.error{background:var(--red)}
+.sync-dot.warn{background:var(--gold)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+@media(max-width:640px){
+  .fgrid2{grid-template-columns:1fr}
+  .hdr{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- LOGIN SCREEN -->
+<!-- ============================================================ -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-eyebrow">HR System</div>
+    <h1 class="login-title">Lembur <em>Tracker</em></h1>
+    <p class="login-sub">Masuk sebagai karyawan atau admin.</p>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="ltabKaryawan" onclick="switchLoginTab('karyawan')">Karyawan</button>
+      <button class="login-tab" id="ltabAdmin" onclick="switchLoginTab('admin')">Admin</button>
+    </div>
+
+    <!-- KARYAWAN LOGIN -->
+    <div id="loginKaryawan">
+      <div class="login-field">
+        <label>Nama Karyawan</label>
+        <input type="text" id="loginNama" class="name-inp" placeholder="Nama lengkap kamu" autocomplete="off" oninput="onNamaInput()">
+      </div>
+      <div class="login-field">
+        <label>PIN (4 digit)</label>
+        <div class="pin-dots" id="karyawanPinDots">
+          <div class="pin-dot"></div><div class="pin-dot"></div>
+          <div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <input type="password" id="loginPin" inputmode="numeric" maxlength="4" placeholder="••••" oninput="onPinInput('karyawan')" onkeydown="if(event.key==='Enter')doLoginKaryawan()">
+      </div>
+      <div class="login-err" id="loginErrKaryawan"></div>
+      <button class="login-btn" onclick="doLoginKaryawan()">Masuk</button>
+    </div>
+
+    <!-- ADMIN LOGIN -->
+    <div id="loginAdmin" style="display:none">
+      <div class="login-field">
+        <label>PIN Admin (4 digit)</label>
+        <div class="pin-dots" id="adminPinDots">
+          <div class="pin-dot"></div><div class="pin-dot"></div>
+          <div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <input type="password" id="loginAdminPin" inputmode="numeric" maxlength="4" placeholder="••••" oninput="onPinInput('admin')" onkeydown="if(event.key==='Enter')doLoginAdmin()">
+      </div>
+      <div class="login-err" id="loginErrAdmin"></div>
+      <button class="login-btn" onclick="doLoginAdmin()">Masuk sebagai Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MAIN APP -->
+<!-- ============================================================ -->
+<div id="mainApp" style="display:none">
+<div class="page">
+
+  <!-- SYNC BAR -->
+  <div id="syncBar" style="display:flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:10px;color:var(--ink3);padding:.4rem .85rem;background:var(--paper2);border:1px solid var(--border);margin-bottom:1.25rem;border-radius:var(--radius)">
+    <div class="sync-dot loading" id="syncDot"></div>
+    <span id="syncText">Menghubungkan...</span>
+    <button onclick="loadFromSheets(true).then(render)" style="margin-left:auto;background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink3);padding:0">↻ Sync</button>
+  </div>
+  <!-- SYNC WARN BAR -->
+  <div id="syncWarnBar" style="display:none;align-items:center;gap:.75rem;font-size:13px;background:var(--warnl);border:1px solid var(--gold);color:var(--warn);padding:.65rem 1rem;margin-bottom:1rem;border-radius:var(--radius)">
+    <span>⚠ Ada perubahan dari perangkat lain.</span>
+    <button class="btn xs ou" onclick="loadFromSheets(true).then(render).then(hideSyncWarn)" style="border-color:var(--warn);color:var(--warn)">Muat Data Terbaru</button>
+  </div>
+
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="eyebrow">HR System</div>
+      <h1>Lembur <em>Hari Libur</em> Tracker</h1>
+    </div>
+    <div class="hdr-right">
+      <div class="user-pill" id="userPill"></div>
+      <button class="btn ou sm" onclick="doLogout()">Keluar</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sumgrid" id="sumgrid"></div>
+
+  <!-- TABS -->
+  <div class="main-tabs" id="mainTabs"></div>
+
+  <!-- VIEWS -->
+  <div id="viewKaryawan" style="display:none">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <select class="filter-sel" id="filterStatusKaryawan" onchange="renderKaryawan()">
+          <option value="">Semua status</option>
+          <option value="pending">Menunggu</option>
+          <option value="approved">Disetujui</option>
+          <option value="rejected">Ditolak</option>
+          <option value="cancelled">Dibatalkan</option>
+        </select>
+      </div>
+      <button class="btn pr" onclick="openSubmitModal()">+ Ajukan Lembur</button>
+    </div>
+    <div class="rlist" id="listKaryawan"></div>
+  </div>
+
+  <div id="viewAdmin" style="display:none">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <input class="search-inp" type="text" placeholder="Cari nama karyawan..." id="searchAdmin" oninput="renderAdmin()">
+        <select class="filter-sel" id="filterStatusAdmin" onchange="renderAdmin()">
+          <option value="">Semua status</option>
+          <option value="pending">Menunggu</option>
+          <option value="approved">Disetujui</option>
+          <option value="rejected">Ditolak</option>
+          <option value="cancelled">Dibatalkan</option>
+        </select>
+        <select class="filter-sel" id="filterBulanAdmin" onchange="renderAdmin()">
+          <option value="">Semua bulan</option>
+        </select>
+      </div>
+    </div>
+    <div class="rlist" id="listAdmin"></div>
+  </div>
+
+  <div id="viewKaryawanMgmt" style="display:none">
+    <div class="toolbar">
+      <div></div>
+      <button class="btn pr" onclick="openAddEmpModal()">+ Tambah Karyawan</button>
+    </div>
+    <div style="border:1px solid var(--border);background:var(--paper)" id="empList"></div>
+  </div>
+
+  <div id="viewRekap" style="display:none">
+    <div style="display:flex;gap:.75rem;align-items:flex-end;margin-bottom:1.5rem;flex-wrap:wrap">
+      <div class="fl">
+        <label>Pilih Bulan</label>
+        <select id="recapBulan" onchange="renderRekap()" style="font-family:var(--mono);font-size:12px;padding:.45rem .75rem;border:1px solid var(--border);background:var(--paper);outline:none;min-width:180px;border-radius:var(--radius)"></select>
+      </div>
+    </div>
+    <div id="recapContent"></div>
+  </div>
+
+  <div id="viewAdminSettings" style="display:none"></div>
+
+</div>
+</div>
+
+<!-- MODAL: SUBMIT LEMBUR -->
+<div class="moverlay" id="modalSubmit">
+  <div class="mbox">
+    <div class="mhead"><span class="mtitle" id="submitModalTitle">Ajukan Lembur Hari Libur</span><button class="mclose" onclick="closeModal('modalSubmit')">×</button></div>
+    <div class="mbody">
+      <div class="msec first">Informasi</div>
+      <div style="padding:.75rem;background:var(--paper2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;font-family:var(--mono);font-size:12px;color:var(--ink3)">
+        Pengajuan atas nama: <strong id="submitNamaLabel" style="color:var(--ink)"></strong>
+      </div>
+      <div class="fl" style="margin-bottom:.75rem"><label>Keterangan Pekerjaan</label><textarea id="fKeterangan" placeholder="Jelaskan pekerjaan yang dilakukan saat lembur..."></textarea></div>
+      <div class="msec">Tanggal Lembur</div>
+      <div id="dateRowsForm"></div>
+      <button class="add-date-btn" onclick="addDateRowForm()">+ Tambah tanggal lembur</button>
+    </div>
+    <div class="mfoot">
+      <button class="btn ou" onclick="closeModal('modalSubmit')">Batal</button>
+      <button class="btn pr" id="submitSaveBtn" onclick="submitLembur()">Kirim Pengajuan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: APPROVE -->
+<div class="moverlay" id="modalApprove">
+  <div class="mbox">
+    <div class="mhead"><span class="mtitle">Setujui Pengajuan</span><button class="mclose" onclick="closeModal('modalApprove')">×</button></div>
+    <div class="mbody">
+      <div id="approveInfo" style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-bottom:1.25rem;padding:.75rem;background:var(--paper2);border:1px solid var(--border)"></div>
+      <div class="msec first">Kalkulasi Upah Lembur</div>
+      <div id="approveRows"></div>
+      <div class="msec">Catatan Admin</div>
+      <div class="fl"><label>Catatan (opsional)</label><input type="text" id="fAdminNote" placeholder="Catatan tambahan dari admin..."></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn ou" onclick="closeModal('modalApprove')">Batal</button>
+      <button class="btn pr" onclick="confirmApprove()">Setujui &amp; Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TAMBAH KARYAWAN -->
+<div class="moverlay" id="modalAddEmp">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><span class="mtitle" id="addEmpTitle">Tambah Karyawan</span><button class="mclose" onclick="closeModal('modalAddEmp')">×</button></div>
+    <div class="mbody">
+      <input type="hidden" id="editEmpId">
+      <div class="fl" style="margin-bottom:.75rem"><label>Nama Lengkap *</label><input type="text" id="fEmpNama" placeholder="Nama karyawan"></div>
+      <div class="fl" style="margin-bottom:.75rem"><label>Jabatan</label><input type="text" id="fEmpJabatan" placeholder="Jabatan / divisi"></div>
+      <div class="fl" style="margin-bottom:.75rem">
+        <label>PIN (4 digit) *</label>
+        <input type="text" id="fEmpPin" inputmode="numeric" maxlength="4" placeholder="cth: 1234" style="font-family:var(--mono);font-size:18px;letter-spacing:.25em;text-align:center">
+      </div>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:.75rem">PIN digunakan karyawan untuk login. Simpan dan bagikan ke karyawan yang bersangkutan.</p>
+      <div class="fl" style="margin-bottom:.5rem">
+        <label>Rate Lembur per Hari (Rp) *</label>
+        <input type="number" id="fEmpRate" min="0" placeholder="cth: 200000">
+      </div>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:.5rem">Hanya terlihat oleh admin. Digunakan untuk kalkulasi otomatis total upah lembur.</p>
+      <div class="login-err" id="empFormErr"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn ou" onclick="closeModal('modalAddEmp')">Batal</button>
+      <button class="btn pr" onclick="saveEmployee()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GANTI PIN ADMIN -->
+<div class="moverlay" id="modalAdminPin">
+  <div class="mbox" style="max-width:380px">
+    <div class="mhead"><span class="mtitle">Ganti PIN Admin</span><button class="mclose" onclick="closeModal('modalAdminPin')">×</button></div>
+    <div class="mbody">
+      <div class="fl" style="margin-bottom:.75rem"><label>PIN Admin Baru (4 digit)</label><input type="text" id="fNewAdminPin" inputmode="numeric" maxlength="4" placeholder="••••" style="font-family:var(--mono);font-size:18px;letter-spacing:.25em;text-align:center"></div>
+      <div class="fl" style="margin-bottom:.5rem"><label>Konfirmasi PIN</label><input type="text" id="fConfirmAdminPin" inputmode="numeric" maxlength="4" placeholder="••••" style="font-family:var(--mono);font-size:18px;letter-spacing:.25em;text-align:center"></div>
+      <div class="login-err" id="adminPinErr"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn ou" onclick="closeModal('modalAdminPin')">Batal</button>
+      <button class="btn pr" onclick="saveAdminPin()">Simpan PIN Baru</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SHEETS CONFIG
+// ============================================================
+var SHEETS_URL = "https://script.google.com/macros/s/AKfycbwDGFSVHT51dKpUSxHQonfFITSf8sX2pVyjrIkzGApBEFxeapiKQPh0ck_gO2t8ocY0qQ/exec";
+var LAST_TS = null;
+var AUTO_SYNC_INT = null;
+
+// ============================================================
+// DATA STORE (Sheets + localStorage cache)
+// ============================================================
+function defaultData(){
+  return { adminPin:'0000', employees:[], requests:[], ts:null };
+}
+
+function loadLocalCache(){
+  var raw = localStorage.getItem('lembur_data');
+  if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+  return defaultData();
+}
+
+function saveLocalCache(){ 
+  localStorage.setItem('lembur_data', JSON.stringify(DATA)); 
+}
+
+async function sheetsRequest(payload){
+  if(payload.action === 'load'){
+    var resp = await fetch(SHEETS_URL + '?action=load&t=' + Date.now());
+    return await resp.json();
+  } else {
+    var resp = await fetch(SHEETS_URL, { method:'POST', body: JSON.stringify(payload) });
+    return await resp.json();
+  }
+}
+
+async function loadFromSheets(force){
+  setSyncStatus('loading','Memuat data...');
+  try {
+    var res = await sheetsRequest({ action:'load' });
+    if(res.ok && res.data){
+      var remote = JSON.parse(res.data);
+      if(!force && LAST_TS && remote.ts && remote.ts !== LAST_TS){
+        setSyncStatus('warn','Ada update dari perangkat lain — klik ↻ untuk muat');
+        return;
+      }
+      DATA = remote;
+      LAST_TS = remote.ts || null;
+      saveLocalCache();
+    } else if(res.ok && !res.data){
+      // Sheet masih kosong, pakai default
+      LAST_TS = null;
+    }
+    setSyncStatus('ok','Tersinkron');
+    hideSyncWarn();
+  } catch(e){
+    setSyncStatus('error','Gagal koneksi — pakai data lokal');
+    DATA = loadLocalCache();
+  }
+}
+
+async function saveToSheets(){
+  setSyncStatus('loading','Menyimpan...');
+  var ts = Date.now().toString();
+  DATA.ts = ts;
+  saveLocalCache();
+  try {
+    var res = await sheetsRequest({ action:'save', data: JSON.stringify(DATA) });
+    if(res.ok){
+      LAST_TS = ts;
+      setSyncStatus('ok','Tersimpan');
+    } else {
+      setSyncStatus('error','Gagal simpan: '+(res.error||''));
+    }
+  } catch(e){
+    setSyncStatus('error','Gagal koneksi — data tersimpan lokal');
+  }
+}
+
+async function saveData(){
+  await saveToSheets();
+}
+
+function startAutoSync(){
+  if(AUTO_SYNC_INT) clearInterval(AUTO_SYNC_INT);
+  AUTO_SYNC_INT = setInterval(async function(){
+    try {
+      var resp = await fetch(SHEETS_URL + '?action=load&t=' + Date.now());
+      var res = await resp.json();
+      if(res.ok && res.data){
+        var remote = JSON.parse(res.data);
+        if(LAST_TS && remote.ts && remote.ts !== LAST_TS){
+          setSyncStatus('warn','Ada update baru — klik ↻');
+          showSyncWarn();
+        }
+      }
+    } catch(e){}
+  }, 30000);
+}
+
+function setSyncStatus(status, text){
+  var dot = document.getElementById('syncDot');
+  var txt = document.getElementById('syncText');
+  if(!dot||!txt) return;
+  dot.className = 'sync-dot '+status;
+  txt.textContent = text;
+}
+
+function showSyncWarn(){
+  var b = document.getElementById('syncWarnBar');
+  if(b) b.style.display='flex';
+}
+function hideSyncWarn(){
+  var b = document.getElementById('syncWarnBar');
+  if(b) b.style.display='none';
+}
+
+var DATA = loadLocalCache();
+var SESSION = { role: null, empId: null, empName: null };
+var pendingApproveId = null;
+var dateRowCount = 0;
+var editingRequestId = null;
+var currentTab = null;
+var editingEmpId = null;
+
+var MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+// ============================================================
+// HELPERS
+// ============================================================
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function fmt(n){ return 'Rp '+Math.round(n||0).toLocaleString('id-ID'); }
+function escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function formatDate(d){
+  if(!d) return '-';
+  var p=d.split('-');
+  return parseInt(p[2])+' '+MONTHS[parseInt(p[1])-1]+' '+p[0];
+}
+function getMonthKey(dateStr){
+  if(!dateStr) return '';
+  var p=dateStr.split('-');
+  return p[0]+'-'+p[1];
+}
+function monthLabel(key){
+  if(!key) return '';
+  var p=key.split('-');
+  return MONTHS[parseInt(p[1])-1]+' '+p[0];
+}
+function statusBadge(s){
+  var map={pending:'Menunggu',approved:'Disetujui',rejected:'Ditolak',cancelled:'Dibatalkan'};
+  return '<span class="badge '+s+'">'+(map[s]||s)+'</span>';
+}
+function initials(name){
+  return (name||'').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
+}
+function emptyState(t,m){ return '<div class="empty-state"><h3>'+t+'</h3><p>'+m+'</p></div>'; }
+
+// ============================================================
+// LOGIN
+// ============================================================
+function switchLoginTab(tab){
+  document.getElementById('loginKaryawan').style.display = tab==='karyawan'?'block':'none';
+  document.getElementById('loginAdmin').style.display = tab==='admin'?'block':'none';
+  document.getElementById('ltabKaryawan').classList.toggle('active', tab==='karyawan');
+  document.getElementById('ltabAdmin').classList.toggle('active', tab==='admin');
+  document.getElementById('loginErrKaryawan').textContent='';
+  document.getElementById('loginErrAdmin').textContent='';
+}
+
+function onNamaInput(){
+  document.getElementById('loginPin').value='';
+  updatePinDots('karyawan','');
+}
+
+function onPinInput(role){
+  var inp = document.getElementById(role==='admin'?'loginAdminPin':'loginPin');
+  var val = inp.value.replace(/\D/g,'').slice(0,4);
+  inp.value = val;
+  updatePinDots(role, val);
+  if(role==='karyawan') document.getElementById('loginErrKaryawan').textContent='';
+  else document.getElementById('loginErrAdmin').textContent='';
+}
+
+function updatePinDots(role, val){
+  var dotsEl = document.getElementById(role==='admin'?'adminPinDots':'karyawanPinDots');
+  var dots = dotsEl.querySelectorAll('.pin-dot');
+  dots.forEach(function(d,i){
+    d.classList.toggle('filled', i<val.length);
+    d.classList.remove('error');
+  });
+}
+
+function shakeError(role){
+  var dotsEl = document.getElementById(role==='admin'?'adminPinDots':'karyawanPinDots');
+  var dots = dotsEl.querySelectorAll('.pin-dot');
+  dots.forEach(function(d){ d.classList.add('error'); });
+  setTimeout(function(){ dots.forEach(function(d){ d.classList.remove('error','filled'); }); }, 800);
+  if(role==='karyawan') document.getElementById('loginPin').value='';
+  else document.getElementById('loginAdminPin').value='';
+}
+
+function doLoginKaryawan(){
+  var nama = document.getElementById('loginNama').value.trim();
+  var pin = document.getElementById('loginPin').value;
+  var errEl = document.getElementById('loginErrKaryawan');
+  if(!nama){ errEl.textContent='Masukkan nama kamu.'; return; }
+  if(pin.length!==4){ errEl.textContent='PIN harus 4 digit.'; return; }
+  var emp = DATA.employees.find(function(e){ return e.name.toLowerCase()===nama.toLowerCase() && e.pin===pin; });
+  if(!emp){ errEl.textContent='Nama atau PIN salah.'; shakeError('karyawan'); return; }
+  SESSION = { role:'karyawan', empId: emp.id, empName: emp.name };
+  enterApp();
+}
+
+function doLoginAdmin(){
+  var pin = document.getElementById('loginAdminPin').value;
+  var errEl = document.getElementById('loginErrAdmin');
+  if(pin.length!==4){ errEl.textContent='PIN harus 4 digit.'; return; }
+  if(pin !== DATA.adminPin){ errEl.textContent='PIN admin salah.'; shakeError('admin'); return; }
+  SESSION = { role:'admin', empId:null, empName:'Admin' };
+  enterApp();
+}
+
+async function enterApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  buildAppChrome();
+  // Show loading state
+  setSyncStatus('loading','Memuat data...');
+  await loadFromSheets(true);
+  startAutoSync();
+  if(SESSION.role==='admin') switchTab('adminPengajuan');
+  else switchTab('karyawan');
+}
+
+function doLogout(){
+  SESSION = { role:null, empId:null, empName:null };
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginNama').value='';
+  document.getElementById('loginPin').value='';
+  document.getElementById('loginAdminPin').value='';
+  updatePinDots('karyawan','');
+  updatePinDots('admin','');
+  document.getElementById('loginErrKaryawan').textContent='';
+  document.getElementById('loginErrAdmin').textContent='';
+}
+
+// ============================================================
+// APP CHROME
+// ============================================================
+function buildAppChrome(){
+  // User pill
+  document.getElementById('userPill').innerHTML = SESSION.role==='admin'
+    ? '⚙ <strong>Admin</strong>'
+    : 'Halo, <strong>'+escH(SESSION.empName)+'</strong>';
+
+  // Tabs
+  var tabsEl = document.getElementById('mainTabs');
+  if(SESSION.role==='admin'){
+    tabsEl.innerHTML = ''
+      +'<button class="main-tab" id="tabBtnAdminPengajuan" onclick="switchTab(\'adminPengajuan\')">Semua Pengajuan</button>'
+      +'<button class="main-tab" id="tabBtnKaryawanMgmt" onclick="switchTab(\'karyawanMgmt\')">Kelola Karyawan</button>'
+      +'<button class="main-tab" id="tabBtnRekap" onclick="switchTab(\'rekap\')">Rekap</button>'
+      +'<button class="main-tab" id="tabBtnAdminSettings" onclick="switchTab(\'adminSettings\')">Pengaturan</button>';
+  } else {
+    tabsEl.innerHTML = '<button class="main-tab" id="tabBtnKaryawan" onclick="switchTab(\'karyawan\')">Pengajuan Saya</button>';
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+var ALL_VIEWS = ['viewKaryawan','viewAdmin','viewKaryawanMgmt','viewRekap','viewAdminSettings'];
+var ALL_TAB_BTNS = ['tabBtnKaryawan','tabBtnAdminPengajuan','tabBtnKaryawanMgmt','tabBtnRekap','tabBtnAdminSettings'];
+
+function switchTab(tab){
+  currentTab = tab;
+  ALL_VIEWS.forEach(function(v){ var el=document.getElementById(v); if(el) el.style.display='none'; });
+  ALL_TAB_BTNS.forEach(function(b){ var el=document.getElementById(b); if(el) el.classList.remove('active'); });
+
+  var viewMap = {
+    karyawan:'viewKaryawan',
+    adminPengajuan:'viewAdmin',
+    karyawanMgmt:'viewKaryawanMgmt',
+    rekap:'viewRekap',
+    adminSettings:'viewAdminSettings'
+  };
+  var btnMap = {
+    karyawan:'tabBtnKaryawan',
+    adminPengajuan:'tabBtnAdminPengajuan',
+    karyawanMgmt:'tabBtnKaryawanMgmt',
+    rekap:'tabBtnRekap',
+    adminSettings:'tabBtnAdminSettings'
+  };
+
+  var viewEl = document.getElementById(viewMap[tab]);
+  if(viewEl) viewEl.style.display='block';
+  var btnEl = document.getElementById(btnMap[tab]);
+  if(btnEl) btnEl.classList.add('active');
+
+  // Settings tab: refresh PIN display
+  if(tab==='adminSettings'){
+    renderSettings();
+  }
+
+  render();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render(){
+  renderSummary();
+  if(currentTab==='karyawan') renderKaryawan();
+  if(currentTab==='adminPengajuan'){ populateBulanFilter(); renderAdmin(); }
+  if(currentTab==='karyawanMgmt') renderEmpList();
+  if(currentTab==='rekap'){ populateRecapBulan(); renderRekap(); }
+}
+
+function renderSummary(){
+  var reqs = SESSION.role==='admin' ? DATA.requests : DATA.requests.filter(function(r){return r.empId===SESSION.empId;});
+  var pending = reqs.filter(function(r){return r.status==='pending';});
+  var approved = reqs.filter(function(r){return r.status==='approved';});
+  var rejected = reqs.filter(function(r){return r.status==='rejected';});
+  var cancelled = reqs.filter(function(r){return r.status==='cancelled';});
+  var totalHari = approved.reduce(function(s,r){return s+r.dates.length;},0);
+  var totalUpah = approved.reduce(function(s,r){
+    return s+Object.values(r.amounts||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0);
+  },0);
+
+  var html = '';
+  if(SESSION.role==='admin'){
+    html += '<div class="scard dk"><div class="slbl">Total Pengajuan</div><div class="sval">'+reqs.length+'</div><div class="snote">semua karyawan</div></div>';
+    html += '<div class="scard"><div class="slbl">Menunggu</div><div class="sval">'+pending.length+'</div><div class="snote">perlu ditinjau</div></div>';
+    html += '<div class="scard"><div class="slbl">Disetujui</div><div class="sval">'+approved.length+'</div><div class="snote">'+totalHari+' total hari</div></div>';
+    html += '<div class="scard"><div class="slbl">Ditolak</div><div class="sval">'+rejected.length+'</div><div class="snote">pengajuan</div></div>';
+    html += '<div class="scard gn"><div class="slbl">Total Upah Lembur</div><div class="sval">'+fmt(totalUpah)+'</div><div class="snote">sudah disetujui</div></div>';
+  } else {
+    html += '<div class="scard dk"><div class="slbl">Pengajuan Saya</div><div class="sval">'+reqs.length+'</div><div class="snote">total dikirim</div></div>';
+    html += '<div class="scard"><div class="slbl">Menunggu</div><div class="sval">'+pending.length+'</div><div class="snote">sedang diproses</div></div>';
+    html += '<div class="scard"><div class="slbl">Disetujui</div><div class="sval">'+approved.length+'</div><div class="snote">'+totalHari+' hari lembur</div></div>';
+    html += '<div class="scard"><div class="slbl">Ditolak</div><div class="sval">'+rejected.length+'</div><div class="snote">pengajuan</div></div>';
+  }
+  document.getElementById('sumgrid').innerHTML = html;
+}
+
+// ============================================================
+// KARYAWAN VIEW
+// ============================================================
+function renderKaryawan(){
+  var statusF = document.getElementById('filterStatusKaryawan')?.value||'';
+  var myReqs = DATA.requests.filter(function(r){
+    return r.empId===SESSION.empId && (!statusF||r.status===statusF);
+  });
+  document.getElementById('submitNamaLabel').textContent = SESSION.empName;
+  var wrap = document.getElementById('listKaryawan');
+  if(!myReqs.length){ wrap.innerHTML = emptyState('Belum ada pengajuan','Klik "+ Ajukan Lembur" untuk membuat pengajuan baru.'); return; }
+  wrap.innerHTML = myReqs.sort(function(a,b){return b.createdAt-a.createdAt;}).map(function(r){ return renderCard(r,false); }).join('');
+}
+
+// ============================================================
+// ADMIN VIEW
+// ============================================================
+function renderAdmin(){
+  var search = document.getElementById('searchAdmin')?.value.toLowerCase()||'';
+  var statusF = document.getElementById('filterStatusAdmin')?.value||'';
+  var bulanF = document.getElementById('filterBulanAdmin')?.value||'';
+  var reqs = DATA.requests.filter(function(r){
+    return r.name.toLowerCase().includes(search)
+      && (!statusF||r.status===statusF)
+      && (!bulanF||r.dates.some(function(d){return getMonthKey(d.date)===bulanF;}));
+  });
+  var wrap = document.getElementById('listAdmin');
+  if(!reqs.length){ wrap.innerHTML = emptyState('Tidak ada data','Belum ada pengajuan yang masuk.'); return; }
+  wrap.innerHTML = reqs.sort(function(a,b){return b.createdAt-a.createdAt;}).map(function(r){ return renderCard(r,true); }).join('');
+}
+
+function populateBulanFilter(){
+  var sel = document.getElementById('filterBulanAdmin');
+  if(!sel) return;
+  var months = new Set();
+  DATA.requests.forEach(function(r){ r.dates.forEach(function(d){ if(d.date) months.add(getMonthKey(d.date)); }); });
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">Semua bulan</option>';
+  Array.from(months).sort().reverse().forEach(function(m){
+    sel.innerHTML += '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+monthLabel(m)+'</option>';
+  });
+}
+
+// ============================================================
+// CARD RENDERER
+// ============================================================
+function renderCard(r, isAdmin){
+  var totalUpah = Object.values(r.amounts||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0);
+  var pct = r.dates.length ? Math.round(Object.keys(r.amounts||{}).length/r.dates.length*100):0;
+  var barColor = r.status==='approved'?'var(--green2)':r.status==='rejected'?'var(--red)':'var(--gold)';
+  var chips = r.dates.map(function(d){ return '<span class="chip">'+formatDate(d.date)+' — '+escH(d.holiday)+'</span>'; }).join('');
+
+  var actions = '';
+  if(!isAdmin && r.status==='pending'){
+    actions = '<div style="display:flex;gap:6px;margin-top:1rem">'
+      +'<button class="btn ou sm" onclick="handleKaryawanAction(event,\'edit\')" data-id="'+r.id+'">Edit Pengajuan</button>'
+      +'<button class="btn dn sm" onclick="handleKaryawanAction(event,\'cancel\')" data-id="'+r.id+'">Batalkan</button>'
+      +'</div>';
+  }
+  if(isAdmin){
+    if(r.status==='pending'){
+      actions = '<div style="display:flex;gap:6px;margin-top:1rem">'
+        +'<button class="btn pr sm" onclick="handleAction(event,\'approve\')" data-id="'+r.id+'">Setujui &amp; Input Upah</button>'
+        +'<button class="btn dn sm" onclick="handleAction(event,\'reject\')" data-id="'+r.id+'">Tolak</button>'
+        +'<button class="btn ou sm" onclick="handleAction(event,\'delete\')" data-id="'+r.id+'" style="margin-left:auto">Hapus</button>'
+        +'</div>';
+    } else {
+      actions = '<div style="display:flex;gap:6px;margin-top:1rem">'
+        +(r.status==='approved'?'<button class="btn ou sm" onclick="handleAction(event,\'approve\')" data-id="'+r.id+'">Edit Upah</button>':'')
+        +'<button class="btn ou sm" onclick="handleAction(event,\'reset\')" data-id="'+r.id+'" style="margin-left:auto">Reset ke Menunggu</button>'
+        +'<button class="btn dn sm" onclick="handleAction(event,\'delete\')" data-id="'+r.id+'">Hapus</button>'
+        +'</div>';
+    }
+  }
+
+  var amountHtml = (isAdmin && r.status==='approved')
+    ? '<div style="margin-top:.75rem;padding:.75rem;background:var(--greens);border:1px solid var(--green2)">'
+      +'<div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.3rem">Total Upah Lembur (Admin)</div>'
+      +'<div style="font-family:var(--serif);font-size:1.3rem;color:var(--green)">'+fmt(totalUpah)+'</div>'
+      +'<div style="font-size:11px;color:var(--ink3);margin-top:2px">'+r.dates.length+' hari lembur</div>'
+      +'</div>'
+    : '';
+
+  var noteHtml = r.adminNote
+    ? '<div style="margin-top:.75rem;font-size:12px;color:var(--ink3)"><span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Catatan admin:</span> '+escH(r.adminNote)+'</div>'
+    : '';
+
+  return '<div class="rcard" id="rcard-'+r.id+'">'
+    +'<div class="chdr" onclick="toggleCard(this)" data-id="'+r.id+'">' 
+    +'<div><div class="rname">'+escH(r.name)+'</div>'
+    +'<div class="rmeta">'+(r.jabatan?'<span>'+escH(r.jabatan)+'</span>':'')+' <span>'+r.dates.length+' hari lembur</span>'
+    +' <span>'+formatDate(new Date(r.createdAt).toISOString().split('T')[0])+'</span></div></div>'
+    +'<div>'+statusBadge(r.status)+'</div>'
+    +'</div>'
+    +'<div class="cprog"><div class="cprogb" style="width:'+pct+'%;background:'+barColor+'"></div></div>'
+    +'<div class="rbody" id="rbody-'+r.id+'">'
+    +'<div class="date-chips">'+chips+'</div>'
+    +(r.keterangan?'<div style="margin-top:.75rem;font-size:13px;color:var(--ink2)">'+escH(r.keterangan)+'</div>':'')
+    +amountHtml+noteHtml+actions
+    +'</div></div>';
+}
+
+function handleKaryawanAction(e, action){
+  e.stopPropagation();
+  var id = e.currentTarget.getAttribute('data-id');
+  if(action==='cancel') cancelRequest(id);
+  else if(action==='edit') openEditRequestModal(id);
+}
+
+async function cancelRequest(id){
+  if(!confirm('Batalkan pengajuan ini? Status akan berubah menjadi Dibatalkan.')) return;
+  var r = DATA.requests.find(function(x){return x.id===id;});
+  if(r){ r.status='cancelled'; }
+  await saveData(); render();
+}
+
+function openEditRequestModal(id){
+  var r = DATA.requests.find(function(x){return x.id===id;});
+  if(!r) return;
+  editingRequestId = id;
+  dateRowCount = 0;
+  document.getElementById('fKeterangan').value = r.keterangan||'';
+  document.getElementById('dateRowsForm').innerHTML = '';
+  r.dates.forEach(function(d){ addDateRowForm(d.date, d.holiday); });
+  document.getElementById('submitModalTitle').textContent = 'Edit Pengajuan Lembur';
+  document.getElementById('submitSaveBtn').textContent = 'Simpan Perubahan';
+  document.getElementById('modalSubmit').classList.add('open');
+}
+
+function handleAction(e, action){
+  e.stopPropagation();
+  var id = e.currentTarget.getAttribute('data-id');
+  if(action==='approve') openApproveModal(id);
+  else if(action==='reject') rejectRequest(id);
+  else if(action==='delete') deleteRequest(id);
+  else if(action==='reset') resetToPending(id);
+}
+
+function toggleCard(el){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-id');
+  var card=document.getElementById('rcard-'+id);
+  var body=document.getElementById('rbody-'+id);
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  card.classList.toggle('open',!open);
+}
+
+// ============================================================
+// KARYAWAN MANAGEMENT (ADMIN)
+// ============================================================
+function renderEmpList(){
+  var wrap = document.getElementById('empList');
+  if(!DATA.employees.length){ wrap.innerHTML = emptyState('Belum ada karyawan','Tambah karyawan dan set PIN mereka.'); return; }
+  wrap.innerHTML = DATA.employees.map(function(e){
+    var myReqs = DATA.requests.filter(function(r){return r.empId===e.id;});
+    var approved = myReqs.filter(function(r){return r.status==='approved';});
+    return '<div class="emp-row">'
+      +'<div class="emp-avatar">'+initials(e.name)+'</div>'
+      +'<div class="emp-info"><div class="emp-name">'+escH(e.name)+'</div>'
+      +'<div class="emp-meta">'+(e.jabatan?escH(e.jabatan)+' · ':'')+myReqs.length+' pengajuan, '+approved.length+' disetujui</div>'
+      +'</div>'
+      +'<div style="text-align:right;margin-right:.75rem">'
+      +'<div class="emp-pin">PIN: '+e.pin+'</div>'
+      +'<div style="font-family:var(--mono);font-size:11px;color:var(--green2);margin-top:2px">'+fmt(e.rate||0)+'/hari</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-left:.75rem">'
+      +'<button class="btn ou xs" onclick="handleEmpAction(event,\'edit\')" data-id="'+e.id+'">Edit</button>'
+      +'<button class="btn dn xs" onclick="handleEmpAction(event,\'delete\')" data-id="'+e.id+'">Hapus</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openAddEmpModal(){
+  editingEmpId = null;
+  document.getElementById('addEmpTitle').textContent = 'Tambah Karyawan';
+  document.getElementById('editEmpId').value = '';
+  document.getElementById('fEmpNama').value = '';
+  document.getElementById('fEmpJabatan').value = '';
+  document.getElementById('fEmpPin').value = '';
+  document.getElementById('fEmpRate').value = '';
+  document.getElementById('empFormErr').textContent = '';
+  document.getElementById('modalAddEmp').classList.add('open');
+}
+
+function handleEmpAction(e, action){
+  e.stopPropagation();
+  var id = e.currentTarget.getAttribute('data-id');
+  if(action==='edit') openEditEmpModal(id);
+  else if(action==='delete') deleteEmployee(id);
+}
+
+function openEditEmpModal(id){
+  var emp = DATA.employees.find(function(e){return e.id===id;});
+  if(!emp) return;
+  editingEmpId = id;
+  document.getElementById('addEmpTitle').textContent = 'Edit Karyawan';
+  document.getElementById('editEmpId').value = id;
+  document.getElementById('fEmpNama').value = emp.name;
+  document.getElementById('fEmpJabatan').value = emp.jabatan||'';
+  document.getElementById('fEmpPin').value = emp.pin;
+  document.getElementById('fEmpRate').value = emp.rate||'';
+  document.getElementById('empFormErr').textContent = '';
+  document.getElementById('modalAddEmp').classList.add('open');
+}
+
+async function saveEmployee(){
+  var nama = document.getElementById('fEmpNama').value.trim();
+  var jabatan = document.getElementById('fEmpJabatan').value.trim();
+  var pin = document.getElementById('fEmpPin').value.replace(/\D/g,'');
+  var errEl = document.getElementById('empFormErr');
+  var rate = parseInt(document.getElementById('fEmpRate').value)||0;
+  if(!nama){ errEl.textContent='Nama wajib diisi.'; return; }
+  if(pin.length!==4){ errEl.textContent='PIN harus tepat 4 digit angka.'; return; }
+  if(!rate || rate<=0){ errEl.textContent='Rate lembur per hari wajib diisi.'; return; }
+  // Cek duplikat PIN (kecuali diri sendiri saat edit)
+  var dupPin = DATA.employees.find(function(e){ return e.pin===pin && e.id!==editingEmpId; });
+  if(dupPin){ errEl.textContent='PIN sudah dipakai oleh '+dupPin.name+'. Gunakan PIN lain.'; return; }
+
+  if(editingEmpId){
+    var emp = DATA.employees.find(function(e){return e.id===editingEmpId;});
+    if(emp){ emp.name=nama; emp.jabatan=jabatan; emp.pin=pin; emp.rate=rate; }
+    // Update nama di requests juga
+    DATA.requests.forEach(function(r){ if(r.empId===editingEmpId){ r.name=nama; r.jabatan=jabatan; } });
+  } else {
+    DATA.employees.push({ id:uid(), name:nama, jabatan:jabatan, pin:pin, rate:rate });
+  }
+  await saveData();
+  closeModal('modalAddEmp');
+  renderEmpList();
+}
+
+async function deleteEmployee(id){
+  var emp = DATA.employees.find(function(e){return e.id===id;});
+  if(!emp) return;
+  var hasReqs = DATA.requests.some(function(r){return r.empId===id;});
+  var msg = hasReqs
+    ? 'Karyawan "'+emp.name+'" punya '+DATA.requests.filter(function(r){return r.empId===id;}).length+' pengajuan. Hapus karyawan dan semua datanya?'
+    : 'Hapus karyawan "'+emp.name+'"?';
+  if(!confirm(msg)) return;
+  DATA.employees = DATA.employees.filter(function(e){return e.id!==id;});
+  if(hasReqs) DATA.requests = DATA.requests.filter(function(r){return r.empId!==id;});
+  await saveData();
+  renderEmpList();
+  render();
+}
+
+// ============================================================
+// ADMIN PIN
+// ============================================================
+function openAdminPinModal(){
+  document.getElementById('fNewAdminPin').value='';
+  document.getElementById('fConfirmAdminPin').value='';
+  document.getElementById('adminPinErr').textContent='';
+  document.getElementById('modalAdminPin').classList.add('open');
+}
+async function saveAdminPin(){
+  var p1 = document.getElementById('fNewAdminPin').value.replace(/\D/g,'');
+  var p2 = document.getElementById('fConfirmAdminPin').value.replace(/\D/g,'');
+  var errEl = document.getElementById('adminPinErr');
+  if(p1.length!==4){ errEl.textContent='PIN harus 4 digit.'; return; }
+  if(p1!==p2){ errEl.textContent='Kedua PIN tidak sama.'; return; }
+  DATA.adminPin = p1;
+  await saveData();
+  closeModal('modalAdminPin');
+  renderSettings();
+  alert('PIN admin berhasil diubah!');
+}
+
+// ============================================================
+// SUBMIT LEMBUR
+// ============================================================
+function openSubmitModal(){
+  editingRequestId = null;
+  dateRowCount=0;
+  document.getElementById('fKeterangan').value='';
+  document.getElementById('dateRowsForm').innerHTML='';
+  document.getElementById('submitModalTitle').textContent = 'Ajukan Lembur Hari Libur';
+  document.getElementById('submitSaveBtn').textContent = 'Kirim Pengajuan';
+  addDateRowForm();
+  document.getElementById('modalSubmit').classList.add('open');
+}
+
+function addDateRowForm(date,holiday){
+  dateRowCount++;
+  var id=dateRowCount;
+  var div=document.createElement('div');
+  div.className='date-row-form';
+  div.id='dfrow-'+id;
+  div.innerHTML='<div class="fl"><label>Tanggal</label><input type="date" id="df-date-'+id+'" value="'+(date||'')+'"></div>'
+    +'<div class="fl"><label>Nama Hari Libur</label><input type="text" id="df-holiday-'+id+'" placeholder="cth: Hari Raya Idul Fitri" value="'+(holiday||'')+'"></div>'
+    +'<button class="remove-btn" onclick="removeDateRowForm('+id+')" aria-label="Hapus">×</button>';
+  document.getElementById('dateRowsForm').appendChild(div);
+}
+
+function removeDateRowForm(id){
+  var el=document.getElementById('dfrow-'+id);
+  if(el) el.remove();
+}
+
+function getDateRows(){
+  return Array.from(document.querySelectorAll('.date-row-form')).map(function(row){
+    var id=row.id.replace('dfrow-','');
+    return { date:document.getElementById('df-date-'+id)?.value||'', holiday:(document.getElementById('df-holiday-'+id)?.value||'').trim() };
+  }).filter(function(r){return r.date&&r.holiday;});
+}
+
+async function submitLembur(){
+  var keterangan=document.getElementById('fKeterangan').value.trim();
+  var dates=getDateRows();
+  if(!dates.length){ alert('Tambahkan minimal satu tanggal lembur beserta nama hari libur.'); return; }
+
+  if(editingRequestId){
+    // Edit mode
+    var r = DATA.requests.find(function(x){return x.id===editingRequestId;});
+    if(r){ r.keterangan=keterangan; r.dates=dates; r.amounts={}; }
+    await saveData();
+    closeModal('modalSubmit');
+    editingRequestId = null;
+    alert('Pengajuan berhasil diperbarui!');
+  } else {
+    // New submission
+    var emp=DATA.employees.find(function(e){return e.id===SESSION.empId;});
+    DATA.requests.push({
+      id:uid(), empId:SESSION.empId, name:SESSION.empName,
+      jabatan:emp?emp.jabatan:'', keterangan:keterangan,
+      dates:dates, status:'pending', amounts:{}, adminNote:'', createdAt:Date.now()
+    });
+    await saveData();
+    closeModal('modalSubmit');
+    alert('Pengajuan '+dates.length+' hari lembur berhasil dikirim!');
+  }
+  render();
+}
+
+// ============================================================
+// APPROVE
+// ============================================================
+function openApproveModal(id){
+  pendingApproveId=id;
+  var r=DATA.requests.find(function(x){return x.id===id;});
+  if(!r) return;
+  var emp=DATA.employees.find(function(e){return e.id===r.empId;});
+  var rate=emp?emp.rate||0:0;
+  var totalUpah=rate*r.dates.length;
+  var infoEl=document.getElementById('approveInfo');
+  infoEl.innerHTML='<strong>'+escH(r.name)+'</strong>'+(r.jabatan?' &middot; <span style="color:var(--ink3)">'+escH(r.jabatan)+'</span>':'')+'<br><span style="margin-top:2px;display:block">'+r.dates.length+' hari lembur diajukan</span>';
+  var rowsHtml='';
+  rowsHtml+='<div style="display:flex;justify-content:space-between;padding:.6rem .75rem;background:var(--paper2);border:1px solid var(--border);margin-bottom:4px;font-size:13px"><span style="color:var(--ink3)">Rate per hari</span><strong style="font-family:var(--mono)">'+fmt(rate)+'</strong></div>';
+  rowsHtml+='<div style="display:flex;justify-content:space-between;padding:.6rem .75rem;background:var(--paper2);border:1px solid var(--border);margin-bottom:8px;font-size:13px"><span style="color:var(--ink3)">Jumlah hari</span><strong style="font-family:var(--mono)">'+r.dates.length+' hari</strong></div>';
+  r.dates.forEach(function(d){
+    rowsHtml+='<div style="display:flex;justify-content:space-between;padding:.5rem .75rem;border-bottom:.5px solid var(--border);font-size:12px"><span style="color:var(--ink3)">'+formatDate(d.date)+' — '+escH(d.holiday)+'</span><span style="font-family:var(--mono)">'+fmt(rate)+'</span></div>';
+  });
+  rowsHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem;background:var(--greens);border:1px solid var(--green2);margin-top:8px"><span style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--green)">Total Upah Lembur</span><strong style="font-family:var(--serif);font-size:1.3rem;color:var(--green)">'+fmt(totalUpah)+'</strong></div>';
+  document.getElementById('approveRows').innerHTML=rowsHtml;
+  document.getElementById('fAdminNote').value=r.adminNote||'';
+  document.getElementById('modalApprove').classList.add('open');
+}
+
+async function confirmApprove(){
+  var r=DATA.requests.find(function(x){return x.id===pendingApproveId;});
+  if(!r) return;
+  var emp=DATA.employees.find(function(e){return e.id===r.empId;});
+  var rate=emp?emp.rate||0:0;
+  var amounts={};
+  r.dates.forEach(function(d,i){ amounts[i]=rate; });
+  r.amounts=amounts; r.status='approved'; r.adminNote=document.getElementById('fAdminNote').value;
+  await saveData();
+  closeModal('modalApprove');
+  render();
+}
+
+// ============================================================
+// ADMIN ACTIONS
+// ============================================================
+async function rejectRequest(id){
+  if(!confirm('Tolak pengajuan ini?')) return;
+  var r=DATA.requests.find(function(x){return x.id===id;});
+  if(r){r.status='rejected';r.amounts={};}
+  await saveData(); render();
+}
+async function resetToPending(id){
+  if(!confirm('Reset ke status Menunggu?')) return;
+  var r=DATA.requests.find(function(x){return x.id===id;});
+  if(r){r.status='pending';r.amounts={};r.adminNote='';}
+  await saveData(); render();
+}
+async function deleteRequest(id){
+  if(!confirm('Hapus pengajuan ini?')) return;
+  DATA.requests=DATA.requests.filter(function(r){return r.id!==id;});
+  await saveData(); render();
+}
+
+// ============================================================
+// REKAP
+// ============================================================
+function populateRecapBulan(){
+  var sel=document.getElementById('recapBulan');
+  if(!sel) return;
+  var months=new Set();
+  DATA.requests.filter(function(r){return r.status==='approved';}).forEach(function(r){
+    r.dates.forEach(function(d){if(d.date)months.add(getMonthKey(d.date));});
+  });
+  var cur=sel.value;
+  sel.innerHTML='<option value="">Semua bulan</option>';
+  Array.from(months).sort().reverse().forEach(function(m){
+    sel.innerHTML+='<option value="'+m+'"'+(m===cur?' selected':'')+'>'+monthLabel(m)+'</option>';
+  });
+}
+
+function renderRekap(){
+  var bulan=document.getElementById('recapBulan')?.value||'';
+  var wrap=document.getElementById('recapContent');
+  if(!wrap) return;
+  var approved=DATA.requests.filter(function(r){
+    if(r.status!=='approved') return false;
+    if(!bulan) return true;
+    return r.dates.some(function(d){return getMonthKey(d.date)===bulan;});
+  });
+  if(!approved.length){wrap.innerHTML=emptyState('Belum ada data','Belum ada pengajuan yang disetujui.');return;}
+
+  var totalHari=0,totalUpah=0;
+  approved.forEach(function(r){
+    var fd=bulan?r.dates.filter(function(d){return getMonthKey(d.date)===bulan;}):r.dates;
+    totalHari+=fd.length;
+    fd.forEach(function(d,i){
+      var origIdx=r.dates.indexOf(d).toString();
+      totalUpah+=parseInt(r.amounts[origIdx]||0)||0;
+    });
+  });
+
+  var pnl='<div class="pnl-box" style="margin-bottom:1.5rem">'
+    +'<div class="pnl-item"><div class="pnl-lbl">Karyawan</div><div class="pnl-val">'+approved.length+'</div></div>'
+    +'<div class="pnl-item"><div class="pnl-lbl">Total Hari Lembur</div><div class="pnl-val">'+totalHari+'</div></div>'
+    +'<div class="pnl-item gn"><div class="pnl-lbl">Total Upah Lembur</div><div class="pnl-val">'+fmt(totalUpah)+'</div></div>'
+    +'</div>';
+
+  var tbl='<table class="ttable"><thead><tr><th>Karyawan</th><th>Jabatan</th><th>Tanggal Lembur</th><th class="r">Hari</th><th class="r">Upah</th></tr></thead><tbody>';
+  approved.forEach(function(r){
+    var fd=bulan?r.dates.filter(function(d){return getMonthKey(d.date)===bulan;}):r.dates;
+    var upah=fd.reduce(function(s,d){
+      var i=r.dates.indexOf(d).toString();
+      return s+(parseInt(r.amounts[i]||0)||0);
+    },0);
+    var chips=fd.map(function(d){return '<span class="chip ok">'+formatDate(d.date)+'<span style="color:var(--green);opacity:.7;margin-left:4px">'+escH(d.holiday)+'</span></span>';}).join('');
+    tbl+='<tr><td><strong>'+escH(r.name)+'</strong></td><td class="mono">'+escH(r.jabatan||'—')+'</td>'
+      +'<td><div style="display:flex;flex-wrap:wrap;gap:3px;padding:2px 0">'+chips+'</div></td>'
+      +'<td class="r">'+fd.length+'</td><td class="r"><strong>'+fmt(upah)+'</strong></td></tr>';
+  });
+  tbl+='<tr style="background:var(--paper2)"><td colspan="3"><strong style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em">Total</strong></td>'
+    +'<td class="r"><strong>'+totalHari+'</strong></td><td class="r"><strong style="font-family:var(--serif);font-size:1.1rem">'+fmt(totalUpah)+'</strong></td></tr>';
+  tbl+='</tbody></table>';
+  wrap.innerHTML=pnl+tbl;
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings(){
+  var cont = document.getElementById('viewAdminSettings');
+  if(!cont) return;
+  cont.innerHTML = '<div style="max-width:440px">'
+    +'<div style="border:1px solid var(--border);background:var(--paper);margin-bottom:1rem">'
+    +'<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border)">'
+    +'<div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.75rem">PIN Admin</div>'
+    +'<div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">'
+    +'<div><div style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-bottom:3px">PIN saat ini</div>'
+    +'<div style="font-family:var(--mono);font-size:1.5rem;letter-spacing:.35em;color:var(--ink);">'+DATA.adminPin+'</div></div>'
+    +'<button class="btn ou sm" onclick="openAdminPinModal()">Ganti PIN Admin</button>'
+    +'</div></div>'
+    +'<div style="padding:.85rem 1.25rem;font-size:12px;color:var(--ink3)">PIN ini digunakan untuk login sebagai admin. Jangan bagikan ke karyawan.</div>'
+    +'</div>'
+    +'<div style="border:1px solid var(--border);background:var(--paper)">'
+    +'<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border)">'
+    +'<div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.75rem">Koneksi Google Sheets</div>'
+    +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">'
+    +'<div class="sync-dot ok"></div>'
+    +'<span style="font-size:13px;color:var(--ink2)">Tersambung</span>'
+    +'</div>'
+    +'<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);word-break:break-all;padding:.6rem .75rem;background:var(--paper2);border:1px solid var(--border)">'+SHEETS_URL+'</div>'
+    +'</div>'
+    +'<div style="padding:.85rem 1.25rem;font-size:12px;color:var(--ink3)">Data disinkronkan otomatis ke Google Sheets setiap ada perubahan.</div>'
+    +'</div>'
+    +'</div>';
+}
+
+// CLOSE ON BACKDROP
+document.querySelectorAll('.moverlay').forEach(function(el){
+  el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});
+});
+</script>
+</body>
+</html>
