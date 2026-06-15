@@ -232,7 +232,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-heigh
           <div class="pin-dot"></div><div class="pin-dot"></div>
           <div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
-        <input type="password" id="loginPin" inputmode="numeric" maxlength="4" placeholder="••••" oninput="onPinInput('karyawan')" onkeydown="if(event.key==='Enter')doLoginKaryawan()">
+        <input type="password" id="loginPin" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" placeholder="••••" oninput="onPinInput('karyawan')" onkeydown="if(event.key==='Enter')doLoginKaryawan()">
       </div>
       <div class="login-err" id="loginErrKaryawan"></div>
       <button class="login-btn" onclick="doLoginKaryawan()">Masuk</button>
@@ -246,7 +246,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-heigh
           <div class="pin-dot"></div><div class="pin-dot"></div>
           <div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
-        <input type="password" id="loginAdminPin" inputmode="numeric" maxlength="4" placeholder="••••" oninput="onPinInput('admin')" onkeydown="if(event.key==='Enter')doLoginAdmin()">
+        <input type="password" id="loginAdminPin" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" placeholder="••••" oninput="onPinInput('admin')" onkeydown="if(event.key==='Enter')doLoginAdmin()">
       </div>
       <div class="login-err" id="loginErrAdmin"></div>
       <button class="login-btn" onclick="doLoginAdmin()">Masuk sebagai Admin</button>
@@ -611,6 +611,11 @@ function onPinInput(role){
   updatePinDots(role, val);
   if(role==='karyawan') document.getElementById('loginErrKaryawan').textContent='';
   else document.getElementById('loginErrAdmin').textContent='';
+  // Auto-submit when 4 digits entered
+  if(val.length===4){
+    if(role==='karyawan') setTimeout(doLoginKaryawan, 100);
+    else setTimeout(doLoginAdmin, 100);
+  }
 }
 
 function updatePinDots(role, val){
@@ -633,11 +638,15 @@ function shakeError(role){
 
 function doLoginKaryawan(){
   var nama = document.getElementById('loginNama').value.trim();
-  var pin = document.getElementById('loginPin').value;
+  var pin = document.getElementById('loginPin').value.replace(/\D/g,'').slice(0,4);
   var errEl = document.getElementById('loginErrKaryawan');
   if(!nama){ errEl.textContent='Masukkan nama kamu.'; return; }
   if(pin.length!==4){ errEl.textContent='PIN harus 4 digit.'; return; }
-  var emp = DATA.employees.find(function(e){ return e.name.toLowerCase()===nama.toLowerCase() && e.pin===pin; });
+  // Case-insensitive name match, strip extra spaces
+  var namaClean = nama.replace(/\s+/g,' ').toLowerCase();
+  var emp = DATA.employees.find(function(e){ 
+    return e.name.replace(/\s+/g,' ').toLowerCase()===namaClean && e.pin===pin; 
+  });
   if(!emp){ errEl.textContent='Nama atau PIN salah.'; shakeError('karyawan'); return; }
   SESSION = { role:'karyawan', empId: emp.id, empName: emp.name };
   enterApp();
@@ -1266,6 +1275,34 @@ function renderSettings(){
 document.querySelectorAll('.moverlay').forEach(function(el){
   el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});
 });
+
+// LOAD DATA FROM SHEETS ON PAGE OPEN (before login)
+(async function init(){
+  var loginBtn = document.querySelector('.login-btn');
+  var loginInfo = document.createElement('div');
+  loginInfo.style.cssText = 'font-family:var(--mono);font-size:10px;color:var(--ink3);text-align:center;margin-bottom:.75rem;letter-spacing:.05em';
+  loginInfo.textContent = 'Memuat data...';
+  var loginBox = document.querySelector('.login-box');
+  loginBox.insertBefore(loginInfo, loginBtn);
+
+  try {
+    var resp = await fetch(SHEETS_URL + '?action=load&t=' + Date.now());
+    var res = await resp.json();
+    if(res.ok && res.data){
+      var remote = JSON.parse(res.data);
+      DATA = remote;
+      LAST_TS = remote.ts || null;
+      localStorage.setItem('lembur_data', JSON.stringify(DATA));
+      loginInfo.textContent = '● Data berhasil dimuat';
+      loginInfo.style.color = 'var(--green2)';
+    } else {
+      loginInfo.textContent = '● Menggunakan data lokal';
+    }
+  } catch(e){
+    loginInfo.textContent = '● Gagal koneksi — menggunakan data lokal';
+    loginInfo.style.color = 'var(--red)';
+  }
+})();
 </script>
 </body>
 </html>
