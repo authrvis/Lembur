@@ -215,6 +215,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-heigh
     <h1 class="login-title">Lembur <em>Tracker</em></h1>
     <p class="login-sub">Masuk sebagai karyawan atau admin.</p>
 
+    <div id="loginInfoBar" style="display:none;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink3);margin-bottom:.75rem;letter-spacing:.05em"></div>
+
     <div class="login-tabs">
       <button class="login-tab active" id="ltabKaryawan" onclick="switchLoginTab('karyawan')">Karyawan</button>
       <button class="login-tab" id="ltabAdmin" onclick="switchLoginTab('admin')">Admin</button>
@@ -1278,29 +1280,27 @@ document.querySelectorAll('.moverlay').forEach(function(el){
 
 // LOAD DATA FROM SHEETS ON PAGE OPEN (before login)
 (async function init(){
-  // Disable all login buttons while loading
-  var loginBtns = document.querySelectorAll('.login-btn');
-  loginBtns.forEach(function(b){ b.disabled=true; b.textContent='Memuat data...'; });
-
-  // Show loading indicator
-  var loginInfo = document.createElement('div');
-  loginInfo.style.cssText = 'font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:center;margin-bottom:.75rem;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:6px';
-  loginInfo.innerHTML = '<div style="width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse .8s ease-in-out infinite"></div><span id="loginInfoText">Memuat data...</span>';
-  var loginBox = document.querySelector('.login-box');
-  loginBox.insertBefore(loginInfo, loginBtns[0]);
-
+  // Show status in login box via a dedicated div already in HTML
+  var loginInfo = document.getElementById('loginInfoBar');
   function setInfo(text, color){
-    var el = document.getElementById('loginInfoText');
-    if(el) el.textContent = text;
-    var dot = loginInfo.querySelector('div');
-    if(dot) dot.style.background = color||'var(--gold)';
+    if(!loginInfo) return;
+    loginInfo.innerHTML = '<div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+(color||'var(--gold)')+'"></div><span>'+text+'</span>';
+    loginInfo.style.display = 'flex';
+  }
+  function disableBtns(disabled, text){
+    document.querySelectorAll('.login-btn').forEach(function(b){ 
+      b.disabled=disabled; 
+      if(text) b.textContent=text;
+    });
   }
 
+  disableBtns(true, 'Memuat data...');
+  setInfo('Memuat data...', 'var(--gold)');
+
   // Retry up to 3 times
-  var success = false;
   for(var attempt=0; attempt<3; attempt++){
     try {
-      setInfo(attempt>0 ? 'Mencoba ulang ('+(attempt+1)+'/3)...' : 'Memuat data...', 'var(--gold)');
+      if(attempt>0) setInfo('Mencoba ulang ('+(attempt+1)+'/3)...', 'var(--gold)');
       var resp = await fetch(SHEETS_URL + '?action=load&t=' + Date.now());
       var res = await resp.json();
       if(res.ok && res.data){
@@ -1308,17 +1308,12 @@ document.querySelectorAll('.moverlay').forEach(function(el){
         DATA = remote;
         LAST_TS = remote.ts || null;
         localStorage.setItem('lembur_data', JSON.stringify(DATA));
-        setInfo('● Siap masuk', 'var(--green2)');
-        success = true;
-        break;
-      } else {
-        setInfo('● Siap masuk (data lokal)', 'var(--green2)');
-        success = true;
-        break;
       }
+      setInfo('Siap masuk', 'var(--green2)');
+      break;
     } catch(e){
       if(attempt===2){
-        setInfo('● Gagal koneksi — menggunakan data lokal', 'var(--red)');
+        setInfo('Gagal koneksi — menggunakan data lokal', 'var(--red)');
         DATA = loadLocalCache();
       } else {
         await new Promise(function(r){setTimeout(r,1500);});
@@ -1326,10 +1321,11 @@ document.querySelectorAll('.moverlay').forEach(function(el){
     }
   }
 
-  // Re-enable login buttons
-  loginBtns.forEach(function(b){ b.disabled=false; b.textContent='Masuk'; });
-  // Fix admin button text
-  var adminBtn = document.getElementById('loginAdmin')?.querySelector('.login-btn');
+  disableBtns(false, null);
+  document.querySelectorAll('.login-btn').forEach(function(b){ 
+    if(b.textContent==='Memuat data...') b.textContent='Masuk';
+  });
+  var adminBtn = document.querySelector('#loginAdmin .login-btn');
   if(adminBtn) adminBtn.textContent='Masuk sebagai Admin';
 })();
 </script>
